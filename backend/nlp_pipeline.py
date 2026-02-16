@@ -4,18 +4,31 @@ class NLPPipeline:
     def __init__(self):
         self.model = spacy.load("en_core_web_sm")
 
-    def extract_entities(self, text):
+    def extract_metadata(self, text):
         doc = self.model(text)
-        entities = []
+
+        metadata = {
+            "date": None,
+            "time": None,
+            "location": None,
+            "persons": []
+        }
+
+        locations = []
+
         for ent in doc.ents:
-            entities.append({
-                "text": ent.text,
-                "label": ent.label_
-            })
-        return entities
+            if ent.label_ == "DATE":
+                metadata["date"] = ent.text
+            elif ent.label_ == "TIME":
+                metadata["time"] = ent.text
+            elif ent.label_ in ["GPE", "LOC", "FAC"]:
+                locations.append(ent.text)
+            elif ent.label_ == "PERSON":
+                metadata["persons"].append(ent.text)
 
+        if locations:
+            metadata["location"] = max(locations, key=len)
 
-if __name__ == "__main__":
-    sample_text = "On 12th January in Delhi, Rajesh attacked Mohan at 9 PM."
-    pipeline = NLPPipeline()
-    print(pipeline.extract_entities(sample_text))
+        metadata["persons"] = list(set(metadata["persons"]))
+
+        return metadata
