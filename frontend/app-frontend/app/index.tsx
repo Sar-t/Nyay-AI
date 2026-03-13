@@ -1,143 +1,90 @@
-import { Text, View, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import imagePaths from '@/constants/imagePaths'
+import { Image } from 'expo-image'
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import ButtonComp from './components/ButtonComp'
+import { router } from 'expo-router'
+import { useEffect, useState } from 'react';
 
-export default function Index() {
-  const router = useRouter();
-  
+const index = () => {
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+
+  useEffect(()=>{
+    if(isLoggedIn){
+      router.replace("/(police)/(tabs)/(dashboard)/dashboard")
+    }
+  },[isLoggedIn])
+  const onPressByCitizen = ()=>{
+    router.push({
+      pathname: "/(auth)/login",
+      params: {userType: "Citizen"}
+    })
+  }
+  const onPressByPolice = ()=>{
+    router.push({
+      pathname: "/(auth)/login",
+      params: {userType: "Police"}
+    })
+  }
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.logo}>⚖️</Text>
-        <Text style={styles.title}>Nyay AI</Text>
-        <Text style={styles.subtitle}>Your AI Legal Assistant</Text>
-
-        <Text style={styles.selectText}>Select Your Role</Text>
-
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.policeButton,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => router.push("/(auth)/login?userType=police")}
-          >
-            <Text style={styles.buttonIcon}>👮</Text>
-            <Text style={styles.buttonTitle}>Police Officer</Text>
-            <Text style={styles.buttonSubtitle}>Law Enforcement Access</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.citizenButton,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => router.push("/(auth)/login?userType=citizen")}
-          >
-            <Text style={styles.buttonIcon}>👤</Text>
-            <Text style={styles.buttonTitle}>Citizen</Text>
-            <Text style={styles.buttonSubtitle}>Legal Guidance & Support</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.footerText}>
-          Get instant legal guidance powered by AI
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={imagePaths.welcome} style={styles.header_image}/>
+        <Text style={styles.header_text}>Nyay AI</Text>
+        <Text style={styles.header_desc_text}>Report crimes easily and get legal guidance using AI</Text>
       </View>
-    </View>
-  );
+      <View style={styles.body}>
+        <ButtonComp title={"Continue as Citizen"} onPress={onPressByCitizen}/>
+        <ButtonComp title={"Continue as Police Officer"} onPress={onPressByPolice} textStyle={{color: "#155DFC"}} containerStyle={{backgroundColor: "#ffffff",borderColor: "#155DFC"}}/>
+      </View>
+      <View style={styles.footer}>
+        <Text style={styles.footer_text}>Powered by Government of India</Text>
+      </View>
+    </SafeAreaView>
+  )
 }
 
+export default index;
+
 const styles = StyleSheet.create({
-  container: {
+  container:{
     flex: 1,
-    backgroundColor: "#fff",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#ffffff",
     alignItems: "center",
-    padding: 24,
+    paddingVertical: verticalScale(120),
+    paddingHorizontal: scale(16),
+    gap: verticalScale(48)
   },
-  logo: {
-    fontSize: 80,
-    marginBottom: 16,
+  header:{
+    alignItems: "center",
+    gap: verticalScale(12),
+    
   },
-  title: {
-    fontSize: 40,
+  header_text:{
+    fontSize: moderateScale(30),
     fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 8,
+    color: "#101828",
   },
-  subtitle: {
-    fontSize: 18,
-    color: "#666",
-    marginBottom: 40,
-  },
-  selectText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: 24,
-  },
-  buttonContainer: {
+  body:{
     width: "100%",
-    maxWidth: 400,
-    gap: 20,
+    gap: 16
   },
-  button: {
-    padding: 24,
-    borderRadius: 16,
-    alignItems: "center",
-    borderWidth: 2,
+  footer:{},
+  header_image:{
+    height: 100,
+    width: 100
   },
-  policeButton: {
-    backgroundColor: "#1e40af",
-    borderColor: "#1e40af",
-    shadowColor: "#1e40af",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+  header_desc_text:{
+    color:"#4A5565",
+    paddingHorizontal: scale(27),
+    textAlign: "center"
   },
-  citizenButton: {
-    backgroundColor: "#2563eb",
-    borderColor: "#2563eb",
-    shadowColor: "#2563eb",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  buttonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
-  },
-  buttonIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  buttonTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  buttonSubtitle: {
-    color: "#e0e7ff",
-    fontSize: 14,
-  },
-  footerText: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 40,
-    textAlign: "center",
-  },
-});
+  footer_text:{
+    color: "#6A7282",
+    fontSize: moderateScale(12)
+  }
+
+})
+
+

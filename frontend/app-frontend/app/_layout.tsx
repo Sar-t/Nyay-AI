@@ -8,9 +8,9 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(police)" options={{ headerShown: false }} />
-      <Stack.Screen name="(citizen)" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(police)" />
+      <Stack.Screen name="(citizen)"/>
     </Stack>
   );
 }
