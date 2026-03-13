@@ -1,226 +1,133 @@
-import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../config/firebase";
-import { Link, useRouter, useLocalSearchParams } from "expo-router";
-
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const { userType } = useLocalSearchParams();
-
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      
-      // Navigate to appropriate dashboard based on user type
-      if (userType === "police") {
-        router.replace("/(police)/dashboard");
-      } else {
-        router.replace("/(citizen)/dashboard");
-      }
-    } catch (err: any) {
-      Alert.alert(
-        "Login Failed",
-        err.message || "An error occurred during login"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.headerContainer}>
-          <Text style={styles.logo}>⚖️ Nyay AI</Text>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>
-            Log in to access your legal assistant
-          </Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              placeholder="Enter your email"
-              placeholderTextColor="#999"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              editable={!loading}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              placeholder="Enter your password"
-              placeholderTextColor="#999"
-              secureTextEntry
-              autoComplete="password"
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              editable={!loading}
-            />
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-              loading && styles.buttonDisabled,
-            ]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text
-  onPress={() =>
-    router.push(
-      `/(auth)/signup?userType=${userType || "citizen"}`
-    )
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters'
+import { Image } from 'expo-image'
+import imagePaths from '@/constants/imagePaths'
+import { router, useLocalSearchParams } from 'expo-router'
+import FormInput from '../components/FormInput'
+import ButtonComp from '../components/ButtonComp'
+import MessageBanner from '../components/MessageBanner'
+const Login = () => { 
+  const {userType} = useLocalSearchParams();
+  const handleRegisterPress = ()=>{
+    router.push({
+      pathname: "/(auth)/create_account",
+      params: {userType: `${userType}`}
+    })
   }
->
-  Login
-</Text>
-            )}
-          </Pressable>
-
-          <View style={styles.linkContainer}>
-            <Text style={styles.linkText}>Don't have an account? </Text>
-            <Link href="/(auth)/signup" asChild>
-              <Pressable disabled={loading}>
-                <Text style={styles.link}>Sign Up</Text>
-              </Pressable>
-            </Link>
-          </View>
+  const handleLoginPress = ()=>{
+    router.replace("/(police)/(tabs)/dashboard")
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={imagePaths.welcome} style={styles.header_img}/>
+        <View style={styles.header_text_container}>
+        <Text style={styles.heading}>{userType=="Citizen"?"Citizen Portal":"Police Portal"}</Text>
+        <Text style={styles.header_desc}>Sign in with your credentials</Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+      </View>
+      <View style={styles.form}>
+        {userType == "Police"?
+        <FormInput placeholder='Enter your badge number' inputLabel='Badge Number'/>
+        :
+        <FormInput placeholder='Enter your email or phone' inputLabel='Email or Phone Number'/>
+        }
+        <FormInput placeholder='Enter your password' inputLabel='Password'/>
+        <View style={styles.forgot_container}>
+          <View></View>
+          <Text style={styles.link_text}>Forgot Password?</Text>
+        </View>
+        <ButtonComp title={"Login"} onPress={handleLoginPress}/>
+        {userType == "Citizen" &&
+        <View style={{gap: verticalScale(15)}}>
+          <View style={styles.or}>
+            <View style={styles.horizontal_line} />
+            <Text >or</Text>
+            <View style={styles.horizontal_line} />
+          </View>
+          <ButtonComp title={"Login with OTP"} onPress={()=>{router.push(`/(auth)/verify_otp?userType="${userType}"`)}}/>
+        </View>
+        }
+      </View>
+      <View>
+        {userType == "Citizen"?
+        <View style={{flexDirection: "row"}}>
+          <Text style={styles.text}>Don't have an account?</Text> 
+          <Pressable onPress={handleRegisterPress}><Text style={styles.link_text}> Sign up</Text></Pressable>
+        </View>:
+        <View style={{flexDirection: "row"}}>
+          <Text style={styles.text}>New Officer?</Text> 
+          <Pressable onPress={handleRegisterPress}><Text style={styles.link_text}> Register here</Text></Pressable>
+        </View>
+        }
+      </View>
+      {userType == "Police" && <MessageBanner textStyle={styles.textStyle} containerStyle={styles.messageContainerStyle} text={"🔒 This is a secure portal for authorized personnel only. Unauthorized access is prohibited."}/>}
+    </SafeAreaView>
+  )
 }
 
+export default Login
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  container:{
+    flex:1,
+    alignItems:"center",
+    paddingHorizontal: scale(24),
+    gap: verticalScale(32)
   },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 24,
+  header:{
+    alignItems: "center"
   },
-  headerContainer: {
+  heading:{
+    color: "#101828",
+    fontSize: moderateScale(24),
+    fontWeight: "bold"
+  },
+  header_text_container:{
     alignItems: "center",
-    marginBottom: 48,
+    gap: verticalScale(8)
   },
-  logo: {
-    fontSize: 48,
-    marginBottom: 16,
+  header_desc:{
+    color: "#4A5565",
+    fontSize: moderateScale(16)
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 8,
+  header_img:{
+    height: moderateScale(80),
+    width: moderateScale(80)
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-  },
-  formContainer: {
+  form:{
     width: "100%",
+    gap: moderateScale(15)
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1a1a1a",
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  button: {
-    backgroundColor: "#2563eb",
-    padding: 18,
-    borderRadius: 12,
-    marginTop: 8,
-    alignItems: "center",
-    shadowColor: "#2563eb",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  buttonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
-  },
-  buttonDisabled: {
-    backgroundColor: "#94a3b8",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  linkContainer: {
+  forgot_container:{
     flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 24,
+    justifyContent: "space-between"
   },
-  linkText: {
-    fontSize: 14,
-    color: "#666",
+  link_text:{
+    color: "#193CB8",
+    fontSize: moderateScale(16)
   },
-  link: {
-    fontSize: 14,
-    color: "#2563eb",
-    fontWeight: "600",
+  horizontal_line:{
+    height: verticalScale(1),
+    backgroundColor: "#D1D5DC",
+    flex: 1,
   },
-});
+  or:{
+    flexDirection: "row",
+    gap: scale(10),
+    alignItems: "center"
+  },
+  text:{
+    fontSize: moderateScale(16),
+  },
+  textStyle:{
+    color: "#973C00"
+  },
+  messageContainerStyle:{
+    backgroundColor: "#FFFBEB",
+    borderColor: "#FEE685"
+  }
+
+})
