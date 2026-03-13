@@ -1,22 +1,17 @@
-// import { initializeApp } from "firebase/app";
-// import {
-//   initializeAuth,
-//   browserLocalPersistence,
-// } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { initializeAuth, browserLocalPersistence } from "firebase/auth";
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCwbpJrbRztsHghuAi2FJqRhEoK0P1n9Y8",
-//   authDomain: "nyayaiauth.firebaseapp.com",
-//   projectId: "nyayaiauth",
-//   storageBucket: "nyayaiauth.firebasestorage.app",
-//   messagingSenderId: "112041338894",
-//   appId: "1:112041338894:web:faf2a8e149e4a1c5c5b45f"
-// };
+const firebaseConfig = {
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+};
 
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// // Initialize Auth with browser local persistence
-// export const auth = initializeAuth(app, {
-//   persistence: browserLocalPersistence
-// });
+export const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence,
+});
